@@ -1,0 +1,11 @@
+// Check with
+// > date; cat /tmp/2 > /dev/ttyACM0
+// > grep -m 1 "END" /dev/ttyACM0; date
+
+https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json
+
+Category:           STM32F4 Boards (Arduino_STM32)
+Board:              Blackpill STM32F401CCU6
+USB Configuration:  USB serial (CDC)
+Optimize:
+
