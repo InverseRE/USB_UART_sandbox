@@ -8,4 +8,8 @@ Optimize:
 Throughput testing (using two shells):
 > grep -m 1 "END" /dev/ttyACM0; date
 > date; cat ./misc/dummy > /dev/ttyACM0
-rate = ( time mark 1 - time mark 2 ) / 131076
+two-way rate = ( time mark 1 - time mark 2 ) / 131076
+
+Cache:       64 bytes
+UART 115200: 26 kBps
+UART 250000: 65 kBps
