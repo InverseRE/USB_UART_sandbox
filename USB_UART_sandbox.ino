@@ -3,7 +3,8 @@
 #include <Arduino.h>
 #include "Ticker.h"
 
-#define BUFFER_SIZE 64
+#define BUFFER_USB_UART_SIZE 64
+#define BUFFER_UART_USB_SIZE 128
 
 Ticker led_ticker;
 #define LED PC13
@@ -13,45 +14,63 @@ Ticker led_ticker;
 auto& p1 = Serial;
 auto& p2 = Serial2;
 
+static char buf1[BUFFER_USB_UART_SIZE];
+static char buf2[BUFFER_UART_USB_SIZE];
+static int buf1_len = 0;
+static int buf2_len = 0;
+
 void setup()
 {
     while (!p1);
     while (!p2);
     p1.begin(115200);
-    p2.begin(250000);
+    p2.begin(115200);
 
     pinMode(LED, OUTPUT);
     led_ticker.set_next(1000);
     digitalWrite(LED, LED_ON);
 }
 
-static char buf_1[BUFFER_SIZE];
-static char buf_2[BUFFER_SIZE];
-
 void loop()
 {
-    if (led_ticker.mark()) {
-        led_ticker.set_next(5000);
-        digitalWrite(LED, LED_OFF);
-    }
+    // UART RX
+    int p2_len = p2.available();
 
-    int len_r1 = p1.available();
-    int len_r2 = p2.available();
-
-    if (len_r1 > 0) {
-        len_r1 = min(len_r1, (int)sizeof(buf_1));
-        p1.readBytes(buf_1, len_r1);
-        p2.write(buf_1, len_r1);
-    }
-
-    if (len_r2 > 0) {
-        len_r2 = min(len_r2, (int)sizeof(buf_2));
-        p2.readBytes(buf_2, len_r2);
-        p1.write(buf_2, len_r2);
-    }
-
-    if (len_r1 > 0|| len_r2 > 0) {
-        led_ticker.set_next(200);
+    if (p2_len > 0) {
         digitalWrite(LED, LED_ON);
+        p2_len = min(p2_len, (int)sizeof(buf2) - buf2_len);
+        buf2_len += p2.readBytes(buf2 + buf2_len, p2_len);
+        return;
     }
+
+    // USB TX
+    if (buf2_len > 0) {
+        digitalWrite(LED, LED_ON);
+        int len = p1.write(buf2, buf2_len);
+        buf2_len -= len;
+        memmove(buf2, buf2 + len, buf2_len);
+        return;
+    }
+
+    // UART RX
+    if (buf1_len > 0) {
+        digitalWrite(LED, LED_ON);
+        int len = p2.write(buf1, buf1_len);
+        buf1_len -= len;
+        memmove(buf1, buf1 + len, buf1_len);
+        return;
+    }
+
+    // USB RX
+    int p1_len = p1.available();
+
+    if (p1_len > 0) {
+        digitalWrite(LED, LED_ON);
+        p1_len = min(p1_len, (int)sizeof(buf1) - buf1_len);
+        buf1_len += p1.readBytes(buf1 + buf1_len, p1_len);
+        return;
+    }
+
+    // NO OP
+    digitalWrite(LED, LED_OFF);
 }

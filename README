@@ -8,8 +8,23 @@ Optimize:
 Throughput testing (using two shells):
 > grep -m 1 "END" /dev/ttyACM0; date
 > date; cat ./misc/dummy > /dev/ttyACM0
-two-way rate = ( time mark 1 - time mark 2 ) / 131076
+two-way rate = 131076 / ( time mark 1 - time mark 2 )
 
-Cache:       64 bytes
-UART 115200: 26 kBps
-UART 250000: 65 kBps
+UART  38400:  11 kBps
+UART 115200:  31 kBps
+UART 250000:  70 kBps
+UART 400000: 116 kBps
+
+
+
+The idea follows:
+
+In this example, link forms a contiguous line:
+USB  ---a-->  CPU  ---b-->  UART  ---c-->  CPU  ---d-->  USB
+
+With the following implications:
+ * payload is constant at any stage (data not added, nor taken away)
+ * 'a' waits when any of 'b' 'c' 'd' is busy
+ * 'b' waits when 'c' of 'd' is busy
+ * 'c' cannot wait, otherwise overrun occurs (data loss)
+ * 'd' could wait if remote is busy
