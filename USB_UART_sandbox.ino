@@ -24,7 +24,7 @@ void setup()
     while (!p1);
     while (!p2);
     p1.begin(115200);
-    p2.begin(115200);
+    p2.begin(400000);
 
     pinMode(LED, OUTPUT);
     led_ticker.set_next(1000);
