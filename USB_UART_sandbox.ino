@@ -11,8 +11,8 @@ Ticker led_ticker;
 #define LED_ON LOW
 #define LED_OFF HIGH
 
-auto& p1 = Serial;
-auto& p2 = Serial2;
+auto& p1 = Serial;  // USB CDC
+auto& p2 = Serial2; // A2 (TX) A3 (RX)
 
 static char buf1[BUFFER_USB_UART_SIZE];
 static char buf2[BUFFER_UART_USB_SIZE];
@@ -52,7 +52,7 @@ void loop()
         return;
     }
 
-    // UART RX
+    // UART TX
     if (buf1_len > 0) {
         digitalWrite(LED, LED_ON);
         int len = p2.write(buf1, buf1_len);
