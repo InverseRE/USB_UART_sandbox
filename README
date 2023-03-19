@@ -19,12 +19,16 @@ UART 400000: 116 kBps
 
 The idea follows:
 
-In this example, link forms a contiguous line:
-USB  ---a-->  CPU  ---b-->  UART  ---c-->  CPU  ---d-->  USB
+In this example, link forms two lines:
+A: USB  ---a-->  CPU  ---b-->  UART
+B: UART ---c-->  CPU  ---d-->  USB
 
 With the following implications:
- * payload is constant at any stage (data not added, nor taken away)
- * 'a' waits when any of 'b' 'c' 'd' is busy
- * 'b' waits when 'c' of 'd' is busy
+ * payload is different in these lines
+ * 'a' waits when 'b' is busy
+ * 'b' does not wait (thought it could be using remote's RTS)
  * 'c' cannot wait, otherwise overrun occurs (data loss)
  * 'd' could wait if remote is busy
+ * line B has priority over line A
+
+The remote counterpart is Bluepill STM32F301 (either in UART loopback or UART-CAN).
