@@ -40,7 +40,9 @@ void loop()
         digitalWrite(LED, LED_ON);
         p2_len = min(p2_len, (int)sizeof(buf2) - buf2_len);
         buf2_len += p2.readBytes(buf2 + buf2_len, p2_len);
-        return;
+
+        if (buf2_len < (int)sizeof(buf2))
+            return;
     }
 
     // USB TX
@@ -49,7 +51,9 @@ void loop()
         int len = p1.write(buf2, buf2_len);
         buf2_len -= len;
         memmove(buf2, buf2 + len, buf2_len);
-        return;
+
+        if (len > 0)
+            return;
     }
 
     // UART TX
@@ -58,7 +62,9 @@ void loop()
         int len = p2.write(buf1, buf1_len);
         buf1_len -= len;
         memmove(buf1, buf1 + len, buf1_len);
-        return;
+
+        if (len > 0)
+            return;
     }
 
     // USB RX
@@ -68,7 +74,9 @@ void loop()
         digitalWrite(LED, LED_ON);
         p1_len = min(p1_len, (int)sizeof(buf1) - buf1_len);
         buf1_len += p1.readBytes(buf1 + buf1_len, p1_len);
-        return;
+
+        if (buf1_len < (int)sizeof(buf1))
+            return;
     }
 
     // NO OP
